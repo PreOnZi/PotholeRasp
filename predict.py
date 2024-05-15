@@ -3,10 +3,10 @@ import cv2
 from ultralytics import YOLO
 
 # Define the absolute path to the videos directory
-VIDEOS_DIR = '/Users/ondrejzika/Desktop/potholes/YOLO/VIDEOS_DIR'
+VIDEOS_DIR = './'
 
 # Define the absolute path to the input video file
-video_path = os.path.join(VIDEOS_DIR, 'videotest.mp4')
+video_path = os.path.join(VIDEOS_DIR, 'videotestShort.mp4')
 video_path_out = '{}_out.mp4'.format(video_path)
 
 # Check if the video file exists
@@ -29,7 +29,7 @@ H, W, _ = frame.shape
 out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 # Define the path to your custom model weights file
-custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs/detect/yolov8n_v8_50e5/weights/best.pt'
+custom_model_path = './best.pt'
 
 # Load the custom model
 model = YOLO(custom_model_path)
