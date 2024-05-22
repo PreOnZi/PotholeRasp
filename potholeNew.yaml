@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['cover', 'divider', 'pothole']
+
+roboflow:
+  workspace: odrej-space-station
+  project: pothole-detection-w7cjz
+  version: 3
+  license: Public Domain
+  url: https://universe.roboflow.com/odrej-space-station/pothole-detection-w7cjz/dataset/3
