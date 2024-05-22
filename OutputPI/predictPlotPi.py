@@ -36,7 +36,7 @@ if frame is None:
     raise IOError("Error: Cannot read frame from the video.")
 
 H, W, _ = frame.shape
-out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
+out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'XVID'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 # Define the path to your custom model weights file
 custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs/detect/yolov8n_v8_50e11/weights/best.pt'
@@ -67,7 +67,16 @@ while ret:
         ad.plot_setup(x_svg_path)
         ad.plot_run()  # Plot the X SVG
 
+    # Display the frame
+    cv2.imshow('Video', frame)
+
+    # Write the frame to the output video file
     out.write(frame)
+
+    # Break the loop if 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
     ret, frame = cap.read()
 
 cap.release()
