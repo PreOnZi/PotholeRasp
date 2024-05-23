@@ -56,25 +56,26 @@ if x_img is None or circle_img is None:
     raise FileNotFoundError("Plotter images not found. Make sure x.svg and circle.svg are in the correct path.")
 
 while ret:
-    results = model(frame)[0]
-
+    results = model(frame)
     pothole_detected_in_frame = False
 
-    for result in results.boxes.data.tolist():
+    for result in results.xyxy[0]:
         x1, y1, x2, y2, score, class_id = result
+        score = float(score)
 
         if score > threshold:
             pothole_detected_in_frame = True
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-            text = f"{results.names[int(class_id)].upper()}: {score:.2f}"
-            cv2.putText(frame, text, (int(x1), int(y1 - 10)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+            text = f"{results.names[int(class_id)]}: {score:.2f}"
+            cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Determine which plotter image to show
     if pothole_detected_in_frame:
         plotter_img = circle_img
+        print('circle.svg')
     else:
         plotter_img = x_img
+        print('x.svg')
 
     # Display the plotter image
     cv2.imshow('Plotter', plotter_img)
