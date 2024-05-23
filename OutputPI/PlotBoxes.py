@@ -1,14 +1,16 @@
 import os
 import cv2
-import cairosvg
-import numpy as np
 from ultralytics import YOLO
+from pyaxidraw import axidraw
 
-# Function to convert SVG to PNG and then to OpenCV format
-def svg_to_image(svg_path):
-    png_data = cairosvg.svg2png(url=svg_path)
-    image = cv2.imdecode(np.frombuffer(png_data, np.uint8), cv2.IMREAD_UNCHANGED)
-    return image
+# Initialize AxiDraw
+ad = axidraw.AxiDraw() 
+ad.options.speed_pendown = 50  # Set maximum pen-down speed to 50%
+ad.interactive()  # Set AxiDraw to interactive mode
+
+# Define paths to the SVG files
+circle_svg_path = "circle.svg"
+x_svg_path = "x.svg"
 
 # Define the absolute path to the videos directory
 VIDEOS_DIR = '/Users/ondrejzika/Desktop/potholes/YOLO/VIDEOS_DIR'
@@ -34,7 +36,7 @@ if frame is None:
     raise IOError("Error: Cannot read frame from the video.")
 
 H, W, _ = frame.shape
-out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
+out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'XVID'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 # Define the path to your custom model weights file
 custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs/detect/yolov8n_v8_50e11/weights/best.pt'
@@ -42,48 +44,38 @@ custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs
 # Load the custom model
 model = YOLO(custom_model_path)
 
-threshold = 0.5
-
-# Paths to SVG plotter images
-x_svg_path = '/Users/ondrejzika/Desktop/potholes/YOLO/x.svg'
-circle_svg_path = '/Users/ondrejzika/Desktop/potholes/YOLO/circle.svg'
-
-# Convert SVG to images
-x_img = svg_to_image(x_svg_path)
-circle_img = svg_to_image(circle_svg_path)
-
-if x_img is None or circle_img is None:
-    raise FileNotFoundError("Plotter images not found. Make sure x.svg and circle.svg are in the correct path.")
+confidence_threshold = 0.6
 
 while ret:
-    results = model(frame)
+    results = model(frame)[0]
+
     pothole_detected_in_frame = False
 
-    for result in results.xyxy[0]:
+    for result in results.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = result
-        score = float(score)
 
-        if score > threshold:
+        if score > confidence_threshold:
             pothole_detected_in_frame = True
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-            text = f"{results.names[int(class_id)]}: {score:.2f}"
-            cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-    # Determine which plotter image to show
+            class_name = result.names[int(class_id)]
+            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
+            text = f"{class_name}: {score:.2f}"  # Include class name and confidence score in the text
+            cv2.putText(frame, text, (int(x1), int(y1) - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+            
     if pothole_detected_in_frame:
-        plotter_img = circle_img
-        print('circle.svg')
+        ad.plot_setup(circle_svg_path)
+        ad.plot_run()  # Plot the circle SVG
     else:
-        plotter_img = x_img
-        print('x.svg')
+        ad.plot_setup(x_svg_path)
+        ad.plot_run()  # Plot the X SVG
 
-    # Display the plotter image
-    cv2.imshow('Plotter', plotter_img)
-    # Display the current frame with bounding boxes
-    cv2.imshow('Frame', frame)
+    # Display the frame
+    cv2.imshow('Video', frame)
 
+    # Write the frame to the output video file
     out.write(frame)
-    
+
+    # Break the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
