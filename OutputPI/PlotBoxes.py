@@ -47,19 +47,17 @@ model = YOLO(custom_model_path)
 confidence_threshold = 0.6
 
 while ret:
-    results = model(frame)[0]
+    results = model(frame)
 
     pothole_detected_in_frame = False
 
-    for result in results.boxes.data.tolist():
+    for result in results.xyxy[0]:
         x1, y1, x2, y2, score, class_id = result
 
-        if score > confidence_threshold:
+        if score > confidence_threshold and class_id == 0:  # Assuming class_id 0 corresponds to potholes
             pothole_detected_in_frame = True
-            # Assume 'pothole' is the class name for the detected potholes
-            class_name = "pothole"  # Change this if you have different class names
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
-            text = f"{class_name}: {score:.2f}"  # Include class name and confidence score in the text
+            text = f"Pothole: {score:.2f}"  # Include class name and confidence score in the text
             cv2.putText(frame, text, (int(x1), int(y1) - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
             
