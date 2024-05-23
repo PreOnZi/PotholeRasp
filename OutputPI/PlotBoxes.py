@@ -51,15 +51,14 @@ while ret:
 
     pothole_detected_in_frame = False
 
-    for result in results.xyxy[0]:
-        x1, y1, x2, y2, score, class_id = result
-
-        if score > confidence_threshold and class_id == 0:  # Assuming class_id 0 corresponds to potholes
-            pothole_detected_in_frame = True
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
-            text = f"Pothole: {score:.2f}"  # Include class name and confidence score in the text
-            cv2.putText(frame, text, (int(x1), int(y1) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+    for result in results:
+        for x1, y1, x2, y2, score, class_id in result.xyxy:
+            if score > confidence_threshold and class_id == 0:  # Assuming class_id 0 corresponds to potholes
+                pothole_detected_in_frame = True
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
+                text = f"Pothole: {score:.2f}"  # Include class name and confidence score in the text
+                cv2.putText(frame, text, (int(x1), int(y1) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
             
     if pothole_detected_in_frame:
         ad.plot_setup(circle_svg_path)
