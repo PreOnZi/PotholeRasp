@@ -56,11 +56,12 @@ while ret:
 
         if score > confidence_threshold:
             pothole_detected_in_frame = True
-            class_name = result.names[int(class_id)]
+            # Assume 'pothole' is the class name for the detected potholes
+            class_name = "pothole"  # Change this if you have different class names
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
             text = f"{class_name}: {score:.2f}"  # Include class name and confidence score in the text
             cv2.putText(frame, text, (int(x1), int(y1) - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
             
     if pothole_detected_in_frame:
         ad.plot_setup(circle_svg_path)
