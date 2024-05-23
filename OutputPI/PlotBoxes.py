@@ -35,6 +35,11 @@ custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs
 model = YOLO(custom_model_path)
 
 threshold = 0.5
+pothole_detected = False
+
+# Load plotter images
+x_img = cv2.imread('/path/to/x.svg')
+circle_img = cv2.imread('/path/to/circle.svg')
 
 while ret:
     results = model(frame)[0]
@@ -52,11 +57,23 @@ while ret:
                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
     if pothole_detected_in_frame:
+        pothole_detected = True
         print('circle.svg')
+        plotter_img = circle_img
     else:
+        pothole_detected = False
         print('x.svg')
+        plotter_img = x_img
+
+    # Display the plotter image
+    cv2.imshow('Plotter', plotter_img)
+    cv2.imshow('Frame', frame)
 
     out.write(frame)
+    
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
     ret, frame = cap.read()
 
 cap.release()
