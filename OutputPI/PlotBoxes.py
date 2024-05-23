@@ -1,6 +1,14 @@
 import os
 import cv2
+import cairosvg
+import numpy as np
 from ultralytics import YOLO
+
+# Function to convert SVG to PNG and then to OpenCV format
+def svg_to_image(svg_path):
+    png_data = cairosvg.svg2png(url=svg_path)
+    image = cv2.imdecode(np.frombuffer(png_data, np.uint8), cv2.IMREAD_UNCHANGED)
+    return image
 
 # Define the absolute path to the videos directory
 VIDEOS_DIR = '/Users/ondrejzika/Desktop/potholes/YOLO/VIDEOS_DIR'
@@ -36,12 +44,16 @@ model = YOLO(custom_model_path)
 
 threshold = 0.5
 
-# Load plotter images
-x_img = cv2.imread('/path/to/x.png')  # Replace with correct path
-circle_img = cv2.imread('/path/to/circle.png')  # Replace with correct path
+# Paths to SVG plotter images
+x_svg_path = '/Users/ondrejzika/Desktop/potholes/YOLO/x.svg'
+circle_svg_path = '/Users/ondrejzika/Desktop/potholes/YOLO/circle.svg'
+
+# Convert SVG to images
+x_img = svg_to_image(x_svg_path)
+circle_img = svg_to_image(circle_svg_path)
 
 if x_img is None or circle_img is None:
-    raise FileNotFoundError("Plotter images not found. Make sure x.png and circle.png are in the correct path.")
+    raise FileNotFoundError("Plotter images not found. Make sure x.svg and circle.svg are in the correct path.")
 
 while ret:
     results = model(frame)[0]
