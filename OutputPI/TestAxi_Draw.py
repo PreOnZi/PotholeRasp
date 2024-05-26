@@ -102,9 +102,9 @@ while ret:
                         cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
                         # Draw a circle for the detected pothole
-                        center_x = 100  # Example center coordinates
-                        center_y = 100
-                        radius = 50  # Example radius
+                        center_x = random.uniform(0, 210)  # Random center coordinates
+                        center_y = random.uniform(0, 297)
+                        radius = 20  # Example radius
                         threading.Thread(target=draw_circle, args=(ad, center_x, center_y, radius)).start()
 
     if not pothole_detected:
