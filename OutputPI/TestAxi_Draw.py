@@ -80,26 +80,22 @@ while ret:
     results = model(frame)
     pothole_detected = False
 
-    for result in results:
-        if result.boxes is not None:
-            for box in result.boxes:
-                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()  # Extract bounding box coordinates
-                score = box.conf.item()  # Confidence score
-                class_id = int(box.cls.item())  # Convert class_id tensor to int
-                class_name = model.names[class_id].strip().lower()  # Retrieve the class name for the current detection
+    for result in results.xyxy:
+        for x1, y1, x2, y2, score, class_id in result:
+            class_name = model.names[class_id].strip().lower()  # Retrieve the class name for the current detection
 
-                if score > confidence_threshold:  # Apply confidence threshold
-                    if class_name == pothole_class_name:
-                        pothole_detected = True
-                        # Draw bounding box around detected pothole
-                        cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green bounding box
-                        text = f"{class_name}: {score:.2f}"
-                        cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+            if score > confidence_threshold:  # Apply confidence threshold
+                if class_name == pothole_class_name:
+                    pothole_detected = True
+                    # Draw bounding box around detected pothole
+                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green bounding box
+                    text = f"{class_name}: {score:.2f}"
+                    cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
-                        # Move plotter to a specific location and wait for 2 seconds
-                        center_x = 100  # Example fixed coordinates
-                        center_y = 100
-                        threading.Thread(target=move_plotter_to_location, args=(ad, center_x, center_y)).start()
+                    # Move plotter to a specific location and wait for 2 seconds
+                    center_x = 100  # Example fixed coordinates
+                    center_y = 100
+                    threading.Thread(target=move_plotter_to_location, args=(ad, center_x, center_y)).start()
 
     if not pothole_detected:
         running.set()
