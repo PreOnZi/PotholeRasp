@@ -4,6 +4,7 @@ import random
 import math
 from ultralytics import YOLO
 from pyaxidraw import axidraw
+import threading
 
 # Initialize AxiDraw
 ad = axidraw.AxiDraw()
@@ -35,6 +36,7 @@ if frame is None:
     raise IOError("Error: Cannot read frame from the video.")
 
 H, W, _ = frame.shape
+out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'mp4v'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 # Define the path to your custom model weights file
 custom_model_path = '/home/pi/Downloads/PotholeRasp-main/OutputPI/best.pt'
@@ -50,10 +52,10 @@ model = YOLO(custom_model_path)
 confidence_threshold = 0.6
 
 # Define the class names we are interested in
-pothole_class_name = "Pothole-aJPT"
+pothole_class_name = "pothole-ajpt".strip().lower()
 
+# Function to draw a circle with the plotter
 def draw_circle(ad, center_x, center_y, radius):
-    # Function to draw a circle with the plotter
     steps = 100  # Number of steps for drawing the circle
     angle_step = 2 * math.pi / steps
     ad.moveto(center_x + radius, center_y)  # Move to the starting point
@@ -63,9 +65,24 @@ def draw_circle(ad, center_x, center_y, radius):
         y = center_y + radius * math.sin(angle)
         ad.lineto(x, y)
 
+# Function to draw random lines with the plotter
+def draw_random_lines(ad, running):
+    while running.is_set():
+        x_start = random.uniform(0, 210)  # Adjust based on plotter's drawing area
+        y_start = random.uniform(0, 297)  # Adjust based on plotter's drawing area
+        x_end = random.uniform(0, 210)
+        y_end = random.uniform(0, 297)
+        ad.moveto(x_start, y_start)
+        ad.lineto(x_end, y_end)
+
+# Thread control
+running = threading.Event()
+running.set()
+line_thread = threading.Thread(target=draw_random_lines, args=(ad, running))
+line_thread.start()
+
 while ret:
     results = model(frame)
-
     pothole_detected = False
 
     for result in results:
@@ -74,33 +91,30 @@ while ret:
                 x1, y1, x2, y2 = box.xyxy[0]  # Extract bounding box coordinates
                 score = box.conf.item()  # Confidence score
                 class_id = int(box.cls.item())  # Convert class_id tensor to int
-                class_name = model.names[class_id]  # Retrieve the class name for the current detection
+                class_name = model.names[class_id].strip().lower()  # Retrieve the class name for the current detection
 
                 if score > confidence_threshold:  # Apply confidence threshold
                     if class_name == pothole_class_name:
                         pothole_detected = True
                         # Draw bounding box around detected pothole
-                        cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)  # Green bounding box
+                        cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green bounding box
                         text = f"{class_name}: {score:.2f}"
-                        cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                        cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
-                        # Move the plotter to a specific location and draw a circle
+                        # Draw a circle for the detected pothole
                         center_x = 100  # Example center coordinates
                         center_y = 100
                         radius = 50  # Example radius
-                        draw_circle(ad, center_x, center_y, radius)
+                        threading.Thread(target=draw_circle, args=(ad, center_x, center_y, radius)).start()
 
     if not pothole_detected:
-        # Draw random lines while the model is running through frames
-        x_start = random.uniform(0, 210)  # Adjust based on plotter's drawing area
-        y_start = random.uniform(0, 297)  # Adjust based on plotter's drawing area
-        x_end = random.uniform(0, 210)
-        y_end = random.uniform(0, 297)
-        ad.moveto(x_start, y_start)
-        ad.lineto(x_end, y_end)
+        running.set()
+    else:
+        running.clear()
 
     # Display the frame
     cv2.imshow('Video', frame)
+    out.write(frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -108,7 +122,12 @@ while ret:
     ret, frame = cap.read()
 
 cap.release()
+out.release()
 cv2.destroyAllWindows()
+
+# Stop the random line drawing thread
+running.clear()
+line_thread.join()
 
 # Disconnect from the Axidraw plotter
 ad.disconnect()
