@@ -13,7 +13,7 @@ if not ad.connect():
     raise IOError("Error: Cannot connect to Axidraw plotter.")
 
 # Define the absolute path to the videos directory
-VIDEOS_DIR = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/outputs'
+VIDEOS_DIR = '/home/pi/Downloads/PotholeRasp-main/OutputPI'
 
 # Define the absolute path to the input video file
 video_path = os.path.join(VIDEOS_DIR, 'TestPlot.mp4')
@@ -38,7 +38,7 @@ if frame is None:
 H, W, _ = frame.shape
 
 # Define the path to your custom model weights file
-custom_model_path = '/Users/ondrejzika/Desktop/Pothole01/pothole_dataset_v8/runs/detect/yolov8n_v8_50e19/weights/best.pt'
+custom_model_path = '/home/pi/Downloads/PotholeRasp-main/OutputPI/best.pt'
 
 # Check if the model weights file exists
 if not os.path.exists(custom_model_path):
