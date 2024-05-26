@@ -3,14 +3,14 @@ import cv2
 import random
 import math
 from ultralytics import YOLO
-from axidraw import axidraw
+from pyaxidraw import axidraw
 
 # Initialize the Axidraw plotter
 ad = axidraw.AxiDraw()
+ad.options.speed_pendown = 50  # Set maximum pen-down speed to 50%
+ad.interactive()  # Set AxiDraw to interactive mode
 
-# Connect to the Axidraw plotter
-if not ad.connect():
-    raise IOError("Error: Cannot connect to Axidraw plotter.")
+
 
 # Define the absolute path to the videos directory
 VIDEOS_DIR = '/home/pi/Downloads/PotholeRasp-main/OutputPI'
