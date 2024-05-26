@@ -5,12 +5,11 @@ import math
 from ultralytics import YOLO
 from pyaxidraw import axidraw
 
-# Initialize the Axidraw plotter
+# Initialize AxiDraw
 ad = axidraw.AxiDraw()
 ad.options.speed_pendown = 50  # Set maximum pen-down speed to 50%
 ad.interactive()  # Set AxiDraw to interactive mode
-
-
+ad.connect()
 
 # Define the absolute path to the videos directory
 VIDEOS_DIR = '/home/pi/Downloads/PotholeRasp-main/OutputPI'
@@ -80,6 +79,11 @@ while ret:
                 if score > confidence_threshold:  # Apply confidence threshold
                     if class_name == pothole_class_name:
                         pothole_detected = True
+                        # Draw bounding box around detected pothole
+                        cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)  # Green bounding box
+                        text = f"{class_name}: {score:.2f}"
+                        cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
                         # Move the plotter to a specific location and draw a circle
                         center_x = 100  # Example center coordinates
                         center_y = 100
