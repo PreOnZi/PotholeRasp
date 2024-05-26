@@ -97,9 +97,11 @@ while ret:
                     if class_name == pothole_class_name:
                         pothole_detected = True
                         # Draw bounding box around detected pothole
-                        cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green bounding box
-                        text = f"{class_name}: {score:.2f}"
-                        cv2.putText(frame, text, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+                   cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)  # Green color
+                    text = f"{class_name}: {score:.2f}"
+                    cv2.putText(frame, text, (int(x1), int(y1) - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+
 
                         # Draw a circle for the detected pothole
                         center_x = random.uniform(0, 210)  # Random center coordinates
