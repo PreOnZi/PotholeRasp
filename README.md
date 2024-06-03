@@ -1,3 +1,6 @@
-# PotholeRasp
+# potholedetection
+
+Dataset+training code for YOLOv8 :
 <br>
-Shortened video: https://1drv.ms/v/s!Al4hHsulYpDKiuctR5YAECHriPd-yg?e=3V2Yzz
+Training tutorial: https://learnopencv.com/train-yolov8-on-custom-dataset/
+<br>
